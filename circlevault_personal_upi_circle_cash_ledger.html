@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CircleVault" />
+  <meta name="theme-color" content="#064e3b" />
+  <title>CircleVault • Sister's Account & UPI Circle Ledger</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23064e3b'/%3E%3Cpath d='M50 18L76 29v21c0 17-11 31-26 36-15-5-26-19-26-36V29l26-11z' fill='%2310b981'/%3E%3Cpath d='M38 50l8 8 16-16' stroke='%23ffffff' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23064e3b'/%3E%3Cpath d='M50 18L76 29v21c0 17-11 31-26 36-15-5-26-19-26-36V29l26-11z' fill='%2310b981'/%3E%3Cpath d='M38 50l8 8 16-16' stroke='%23ffffff' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-light: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --emerald-900: #064e3b;
+      --emerald-700: #047857;
+      --emerald-600: #059669;
+      --emerald-500: #10b981;
+      --emerald-50: #ecfdf5;
+      --rose-600: #e11d48;
+      --rose-50: #fff1f2;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.4;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .tabular {
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+    }
+
+    /* =========================================================================
+       LOCK SCREEN (Permanent 5-Digit PIN: 79819 + Biometric Fingerprint)
+       ========================================================================= */
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: radial-gradient(circle at top, #064e3b 0%, #020617 72%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .lock-card {
+      width: 100%;
+      max-width: 360px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 26px;
+      padding: 26px 20px;
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    .lock-shield {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #10b981, #047857);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lock-title {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .lock-sub {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .pin-dots {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 20px 0 8px;
+    }
+
+    .pin-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #475569;
+      transition: all 0.15s ease;
+    }
+
+    .pin-dot.filled {
+      background: #10b981;
+      border-color: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      transform: scale(1.15);
+    }
+
+    .pin-dot.error {
+      background: #f43f5e;
+      border-color: #f43f5e;
+    }
+
+    .pin-error {
+      min-height: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fb7185;
+      margin-bottom: 10px;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25%, 75% { transform: translateX(-7px); }
+      50% { transform: translateX(7px); }
+    }
+
+    .shake {
+      animation: shake 0.3s ease;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .key-btn {
+      height: 52px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      background: rgba(30, 41, 59, 0.85);
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s ease, background 0.12s ease;
+    }
+
+    .key-btn:active {
+      transform: scale(0.94);
+      background: #10b981;
+      color: #022c22;
+    }
+
+    .key-btn.util {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      background: rgba(15, 23, 42, 0.7);
+    }
+
+    .fp-divider {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-fp {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      background: rgba(16, 185, 129, 0.16);
+      color: #6ee7b7;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-fp:active {
+      transform: scale(0.98);
+      background: rgba(16, 185, 129, 0.28);
+    }
+
+    .fp-hint {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    /* =========================================================================
+       MAIN MOBILE-FIRST APP CONTAINER (Max-Width 480px Centered)
+       ========================================================================= */
+    .app-wrapper {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #10b981, #064e3b);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-titles {
+      min-width: 0;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .badge-pin {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--emerald-50);
+      color: var(--emerald-700);
+      border: 1px solid #a7f3d0;
+      white-space: nowrap;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-top {
+      padding: 7px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-lock {
+      padding: 7px 11px;
+      border-radius: 10px;
+      border: none;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .content {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Hero Balance Card */
+    .hero-card {
+      background: linear-gradient(145deg, #064e3b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(6, 78, 59, 0.18);
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hero-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #6ee7b7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot-live {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+    }
+
+    .pace-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+    }
+
+    .hero-balance-row {
+      margin: 12px 0 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+
+    .hero-rs {
+      font-size: 24px;
+      font-weight: 700;
+      color: #34d399;
+    }
+
+    .hero-num {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-note {
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .hero-grid {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .summary-tile {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    .tile-lbl {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tile-lbl.in { color: #6ee7b7; }
+    .tile-lbl.out { color: #fda4af; }
+
+    .tile-val {
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 3px;
+    }
+
+    /* Section Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Quick Logger */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--bg-subtle);
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+
+    .tab-btn {
+      padding: 9px 8px;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .tab-btn.active-spend {
+      background: #ffffff;
+      color: var(--rose-600);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .tab-btn.active-deposit {
+      background: #ffffff;
+      color: var(--emerald-700);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .field {
+      margin-bottom: 11px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+
+    .amt-wrap {
+      position: relative;
+    }
+
+    .amt-sym {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 11px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-page);
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .input:focus {
+      border-color: var(--emerald-500);
+      background: #ffffff;
+    }
+
+    .input-amt {
+      padding-left: 28px;
+      font-size: 19px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .chip {
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .chip:active {
+      background: var(--emerald-50);
+      border-color: var(--emerald-500);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-log {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 13px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .btn-log.spend { background: var(--rose-600); }
+    .btn-log.deposit { background: var(--emerald-600); }
+
+    /* =========================================================================
+       IMMUTABLE LEDGER & CRITICAL HORIZONTAL CARD LAYOUT FIX
+       ========================================================================= */
+    .ledger-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .ledger-heading {
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .pill-count {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      padding: 7px 6px;
+      border-radius: 9px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-page);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+
+    .search-box {
+      margin-bottom: 12px;
+    }
+
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* CRITICAL HORIZONTAL FLEX FIX FOR TRANSACTION ROWS */
+    .tx-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 14px;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      width: 100%;
+    }
+
+    .tx-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .tx-icon.deposit {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+    }
+
+    .tx-icon.spend {
+      background: var(--rose-50);
+      color: var(--rose-600);
+    }
+
+    .tx-info {
+      flex: 1;
+      min-width: 0;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .tx-title {
+      font-weight: 600;
+      font-size: 15px;
+      line-height: 1.3;
+      color: var(--text-main);
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .tx-sub-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tx-cat {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--bg-subtle);
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .tx-cat.deposit {
+      background: var(--emerald-50);
+      color: var(--emerald-700);
+    }
+
+    .tx-recorded {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--emerald-700);
+      white-space: nowrap;
+    }
+
+    .tx-datetime {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      word-break: normal;
+    }
+
+    .tx-right {
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .tx-amt {
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tx-amt.deposit { color: var(--emerald-600); }
+    .tx-amt.spend { color: var(--rose-600); }
+
+    .tx-bal {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+
+    /* =========================================================================
+       VAULT & BACKUP MODAL
+       ========================================================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(2, 6, 23, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .btn-x {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-subtle);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .vault-section {
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 13px;
+      margin-bottom: 11px;
+    }
+
+    .vault-section h4 {
+      font-size: 13.5px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .vault-section p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .btn-emerald {
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 10px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .btn-outline {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-12px);
+      z-index: 150;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================================
+       1. LOCK SCREEN (5-Digit Permanent PIN: 79819 + Fingerprint Biometrics)
+       ========================================================================= -->
+  <div id="lockScreen" class="lock-screen">
+    <div class="lock-card">
+      <div class="lock-shield" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <path d="m9 12 2 2 4-4"></path>
+        </svg>
+      </div>
+      <h1 class="lock-title">CircleVault</h1>
+      <p class="lock-sub">Enter your 5-digit PIN or use Fingerprint</p>
+
+      <div id="pinDots" class="pin-dots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+
+      <div id="pinError" class="pin-error"></div>
+
+      <div class="keypad">
+        <button type="button" class="key-btn" data-num="1">1</button>
+        <button type="button" class="key-btn" data-num="2">2</button>
+        <button type="button" class="key-btn" data-num="3">3</button>
+        <button type="button" class="key-btn" data-num="4">4</button>
+        <button type="button" class="key-btn" data-num="5">5</button>
+        <button type="button" class="key-btn" data-num="6">6</button>
+        <button type="button" class="key-btn" data-num="7">7</button>
+        <button type="button" class="key-btn" data-num="8">8</button>
+        <button type="button" class="key-btn" data-num="9">9</button>
+        <button type="button" class="key-btn util" id="btnClearPin">Clear</button>
+        <button type="button" class="key-btn" data-num="0">0</button>
+        <button type="button" class="key-btn util" id="btnBackPin">⌫</button>
+      </div>
+
+      <div class="fp-divider">
+        <button type="button" id="btnFingerprintLogin" class="btn-fp">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"></path>
+            <path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"></path>
+            <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"></path>
+            <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"></path>
+            <path d="M8.65 22c.21-.66.45-1.32.57-2"></path>
+            <path d="M14 13.12c0 2.38 0 6.38-1 8.88"></path>
+            <path d="M2 16h.01"></path>
+            <path d="M21.8 16c.2-2 .131-5.354 0-6"></path>
+            <path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"></path>
+          </svg>
+          <span>Unlock with Fingerprint</span>
+        </button>
+        <p id="fpLockStatus" class="fp-hint">Private &amp; Locked • Stored locally on this device</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       2. MAIN APPLICATION (Mobile-First 480px Container)
+       ========================================================================= -->
+  <div id="appMain" class="app-wrapper hidden">
+    <header class="topbar">
+      <div class="brand-left">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="3"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <div class="brand-row">
+            <span class="brand-name">CircleVault</span>
+            <span class="badge-pin">PIN Locked</span>
+          </div>
+          <div class="brand-sub">Sister's Account • UPI Circle</div>
+        </div>
+      </div>
+
+      <div class="topbar-btns">
+        <button type="button" id="btnOpenVault" class="btn-top">Vault &amp; Backup</button>
+        <button type="button" id="btnLockNow" class="btn-lock">Lock</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Hero Balance Card -->
+      <section class="hero-card">
+        <div class="hero-top">
+          <span class="hero-label">
+            <span class="dot-live"></span>
+            REMAINING AVAILABLE BALANCE
+          </span>
+          <span id="pacePill" class="pace-pill">~8 days left</span>
+        </div>
+
+        <div class="hero-balance-row">
+          <span class="hero-rs">₹</span>
+          <span id="remainingVal" class="hero-num tabular">684.00</span>
+        </div>
+        <p class="hero-note">Your personal share inside your sister's bank account</p>
+
+        <div class="hero-grid">
+          <div class="summary-tile">
+            <div class="tile-lbl in">↓ Total Cash Deposited</div>
+            <div id="depositedVal" class="tile-val tabular">₹1,000.00</div>
+          </div>
+          <div class="summary-tile">
+            <div class="tile-lbl out">↑ Total UPI Spent</div>
+            <div id="spentVal" class="tile-val tabular">₹316.00</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Transaction Logger -->
+      <section class="card">
+        <div class="tabs">
+          <button type="button" id="tabSpend" class="tab-btn active-spend">Log UPI Spend (-)</button>
+          <button type="button" id="tabDeposit" class="tab-btn">Log Cash Deposit (+)</button>
+        </div>
+
+        <form id="txForm">
+          <div class="field">
+            <label for="txAmount">Amount (₹)</label>
+            <div class="amt-wrap">
+              <span class="amt-sym">₹</span>
+              <input id="txAmount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="input input-amt" />
+            </div>
+            <div id="quickChips" class="chips"></div>
+          </div>
+
+          <div class="row-2">
+            <div class="field" id="catWrap">
+              <label for="txCategory">Category</label>
+              <select id="txCategory" class="input">
+                <option value="Canteen / Meals">Canteen / Meals</option>
+                <option value="Food / Snacks">Food / Snacks</option>
+                <option value="Auto / Travel">Auto / Travel</option>
+                <option value="Repair / Maintenance">Repair / Maintenance</option>
+                <option value="Print / Stationery">Print / Stationery</option>
+                <option value="Transfer / Test">Transfer / Test</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="txDate">Date &amp; Time</label>
+              <input id="txDate" type="datetime-local" required class="input" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="txTitle">Title / Description</label>
+            <input id="txTitle" type="text" maxlength="70" placeholder="e.g., Tea & omelet, or Cash Deposit" class="input" />
+          </div>
+
+          <button type="submit" id="btnSubmitTx" class="btn-log spend">Record UPI Payment (-)</button>
+        </form>
+      </section>
+
+      <!-- Immutable Ledger -->
+      <section class="card">
+        <div class="ledger-top">
+          <h2 class="ledger-heading">
+            <span>Immutable Ledger</span>
+            <span id="recordCount" class="pill-count">5 records</span>
+          </h2>
+        </div>
+
+        <div class="filter-bar">
+          <button type="button" class="filter-btn active" data-filter="all">All</button>
+          <button type="button" class="filter-btn" data-filter="spend">UPI Spends</button>
+          <button type="button" class="filter-btn" data-filter="deposit">Cash Deposits</button>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="searchInput" class="input" placeholder="Search title or category..." />
+        </div>
+
+        <div id="txList" class="tx-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       3. VAULT & BACKUP MODAL (Fingerprint Registration & JSON Backup)
+       ========================================================================= -->
+  <div id="vaultModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Vault &amp; Backup</h3>
+        <button type="button" id="btnCloseVault" class="btn-x">✕</button>
+      </div>
+
+      <div class="vault-section">
+        <h4>
+          <span>Biometric Fingerprint</span>
+          <span id="fpBadge" class="badge-pin">Ready</span>
+        </h4>
+        <p id="fpModalDesc">
+          Register your phone or laptop fingerprint sensor for 1-touch unlock when opened over HTTPS (such as GitHub Pages).
+        </p>
+        <button type="button" id="btnRegisterFp" class="btn-emerald">Register Device Fingerprint</button>
+      </div>
+
+      <div class="vault-section">
+        <h4>
+          <span>Permanent 5-Digit PIN</span>
+          <span class="badge-pin">Locked</span>
+        </h4>
+        <p style="margin-bottom:0;">
+          Your 5-digit PIN is permanently locked on this vault. No reset or transaction delete options exist.
+        </p>
+      </div>
+
+      <div class="vault-section" style="margin-bottom:0;">
+        <h4><span>JSON Backup &amp; Restore</span></h4>
+        <p>Export your ledger to move data between your phone and laptop, or restore from a saved JSON file.</p>
+        <div class="row-2">
+          <button type="button" id="btnExportJson" class="btn-emerald">Export JSON</button>
+          <label class="btn-outline" style="cursor:pointer;">
+            <span>Import JSON</span>
+            <input type="file" id="fileImportJson" accept=".json" class="hidden" />
+          </label>
+        </div>
+        <div id="restoreConfirm" class="hidden" style="margin-top:10px;padding:10px;border-radius:10px;background:#fffbeb;border:1px solid #fcd34d;font-size:12px;color:#92400e;">
+          <div id="restoreConfirmMsg" style="font-weight:700;margin-bottom:8px;"></div>
+          <div class="row-2">
+            <button type="button" id="btnCancelRestore" class="btn-outline" style="padding:6px;">Cancel</button>
+            <button type="button" id="btnConfirmRestore" class="btn-emerald" style="padding:6px;">Confirm Restore</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const PERMANENT_PIN = '79819';
+      const STORAGE_DATA_KEY = 'circlevault_v5_data';
+      const STORAGE_FP_KEY = 'circlevault_v5_webauthn_id';
+
+      // Pre-loaded baseline records (16 Nov 2026 - 26 Nov 2026)
+      const BASELINE_DATA = [
+        {
+          id: 'tx_1',
+          type: 'deposit',
+          amount: 1000,
+          title: "Cash Deposit (Sister's Account)",
+          category: 'Cash Deposit',
+          date: '2026-11-16T12:59'
+        },
+        {
+          id: 'tx_2',
+          type: 'spend',
+          amount: 25,
+          title: 'Omelet',
+          category: 'Food / Snacks',
+          date: '2026-11-23T12:07'
+        },
+        {
+          id: 'tx_3',
+          type: 'spend',
+          amount: 1,
+          title: 'UPI Circle test',
+          category: 'Transfer / Test',
+          date: '2026-11-24T22:23'
+        },
+        {
+          id: 'tx_4',
+          type: 'spend',
+          amount: 70,
+          title: 'Night canteen',
+          category: 'Canteen / Meals',
+          date: '2026-11-25T23:01'
+        },
+        {
+          id: 'tx_5',
+          type: 'spend',
+          amount: 220,
+          title: 'Cycle chain repair',
+          category: 'Repair / Maintenance',
+          date: '2026-11-26T10:59'
+        }
+      ];
+
+      let transactions = [];
+      let pinBuffer = '';
+      let activeMode = 'spend';
+      let activeFilter = 'all';
+      let pendingRestoreData = null;
+      let toastTimeout = null;
+
+      const $ = (id) => document.getElementById(id);
+
+      function showToast(msg) {
+        const el = $('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => el.classList.remove('show'), 2500);
+      }
+
+      function formatINR(num) {
+        return (Number(num) || 0).toLocaleString('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function escapeHtml(text) {
+        return String(text || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      /* -----------------------------------------------------------------------
+         STORAGE INITIALIZATION
+         ----------------------------------------------------------------------- */
+      function initStorage() {
+        try {
+          const saved = localStorage.getItem(STORAGE_DATA_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              transactions = parsed;
+              return;
+            }
+          }
+        } catch (e) {}
+        transactions = BASELINE_DATA.slice();
+        persistStorage();
+      }
+
+      function persistStorage() {
+        try {
+          localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(transactions));
+        } catch (e) {}
+      }
+
+      /* -----------------------------------------------------------------------
+         5-DIGIT PIN UNLOCK (79819)
+         ----------------------------------------------------------------------- */
+      function renderPinDots(isErr) {
+        const dots = document.querySelectorAll('#pinDots .pin-dot');
+        dots.forEach((dot, idx) => {
+          dot.classList.remove('filled', 'error');
+          if (isErr) {
+            dot.classList.add('error');
+          } else if (idx < pinBuffer.length) {
+            dot.classList.add('filled');
+          }
+        });
+      }
+
+      function enterDigit(d) {
+        if (pinBuffer.length >= 5) return;
+        pinBuffer += String(d);
+        $('pinError').textContent = '';
+        renderPinDots(false);
+        if (pinBuffer.length === 5) {
+          setTimeout(checkPin, 100);
+        }
+      }
+
+      function checkPin() {
+        if (pinBuffer === PERMANENT_PIN) {
+          pinBuffer = '';
+          renderPinDots(false);
+          $('lockScreen').classList.add('hidden');
+          $('appMain').classList.remove('hidden');
+          setNowDateTime();
+          renderLedger();
+        } else {
+          $('pinError').textContent = 'Incorrect PIN. Try again.';
+          renderPinDots(true);
+          const dotsWrap = $('pinDots');
+          dotsWrap.classList.remove('shake');
+          void dotsWrap.offsetWidth;
+          dotsWrap.classList.add('shake');
+          setTimeout(() => {
+            pinBuffer = '';
+            renderPinDots(false);
+          }, 400);
+        }
+      }
+
+      function lockApp() {
+        pinBuffer = '';
+        renderPinDots(false);
+        $('pinError').textContent = '';
+        $('appMain').classList.add('hidden');
+        $('lockScreen').classList.remove('hidden');
+        updateFingerprintStatus();
+      }
+
+      /* -----------------------------------------------------------------------
+         WEBAUTHN BIOMETRIC FINGERPRINT UNLOCK
+         ----------------------------------------------------------------------- */
+      function toBase64Url(buf) {
+        const bytes = new Uint8Array(buf);
+        let str = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          str += String.fromCharCode(bytes[i]);
+        }
+        return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function fromBase64Url(b64url) {
+        const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+        const pad = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+        const bin = atob(pad);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+          arr[i] = bin.charCodeAt(i);
+        }
+        return arr.buffer;
+      }
+
+      function hasWebAuthn() {
+        return (
+          typeof window.PublicKeyCredential !== 'undefined' &&
+          navigator.credentials &&
+          typeof navigator.credentials.create === 'function'
+        );
+      }
+
+      function updateFingerprintStatus() {
+        const credId = localStorage.getItem(STORAGE_FP_KEY);
+        const isSecure = window.isSecureContext && location.protocol === 'https:';
+        const lockNote = $('fpLockStatus');
+        const badge = $('fpBadge');
+
+        if (!hasWebAuthn() || !isSecure) {
+          if (lockNote) {
+            lockNote.textContent = 'Fingerprint requires HTTPS (GitHub Pages). Enter PIN 79819 here.';
+          }
+          if (badge) badge.textContent = 'Requires HTTPS';
+          return;
+        }
+
+        if (credId) {
+          if (lockNote) lockNote.textContent = 'Fingerprint ready on this device • Or enter PIN';
+          if (badge) badge.textContent = 'Registered';
+        } else {
+          if (lockNote) lockNote.textContent = 'Tap to register & unlock with Fingerprint, or enter PIN';
+          if (badge) badge.textContent = 'Not Registered';
+        }
+      }
+
+      async function registerFingerprint(unlockOnSuccess) {
+        const lockNote = $('fpLockStatus');
+        const modalDesc = $('fpModalDesc');
+        const isSecure = window.isSecureContext && location.protocol === 'https:';
+
+        if (!hasWebAuthn() || !isSecure) {
+          const msg = 'Fingerprint requires an HTTPS link (such as GitHub Pages). In local files or iframes, use PIN 79819.';
+          if (lockNote) lockNote.textContent = msg;
+          if (modalDesc) modalDesc.textContent = msg;
+          showToast('Use PIN 79819 (HTTPS required for fingerprint)');
+          return;
+        }
+
+        try {
+          const challenge = new Uint8Array(32);
+          crypto.getRandomValues(challenge);
+          const userId = new Uint8Array(16);
+          crypto.getRandomValues(userId);
+
+          const cred = await navigator.credentials.create({
+            publicKey: {
+              challenge,
+              rp: { name: 'CircleVault Ledger' },
+              user: {
+                id: userId,
+                name: 'owner@circlevault.app',
+                displayName: 'CircleVault Owner'
+              },
+              pubKeyCredParams: [
+                { type: 'public-key', alg: -7 },
+                { type: 'public-key', alg: -257 }
+              ],
+              authenticatorSelection: {
+                authenticatorAttachment: 'platform',
+                userVerification: 'required'
+              },
+              timeout: 60000
+            }
+          });
+
+          if (cred && cred.rawId) {
+            localStorage.setItem(STORAGE_FP_KEY, toBase64Url(cred.rawId));
+            updateFingerprintStatus();
+            showToast('Device fingerprint registered!');
+            if (unlockOnSuccess) {
+              $('lockScreen').classList.add('hidden');
+              $('appMain').classList.remove('hidden');
+              setNowDateTime();
+              renderLedger();
+            }
+          }
+        } catch (err) {
+          const msg = 'Fingerprint sensor cancelled or unavailable in this browser context. Use PIN 79819.';
+          if (lockNote) lockNote.textContent = msg;
+          if (modalDesc) modalDesc.textContent = msg;
+          showToast('Use PIN 79819 to unlock');
+        }
+      }
+
+      async function unlockWithFingerprint() {
+        const credId = localStorage.getItem(STORAGE_FP_KEY);
+        const isSecure = window.isSecureContext && location.protocol === 'https:';
+
+        if (!hasWebAuthn() || !isSecure) {
+          $('fpLockStatus').textContent =
+            'Fingerprint requires an HTTPS link (like GitHub Pages). Enter PIN 79819 to unlock.';
+          return;
+        }
+
+        if (!credId) {
+          await registerFingerprint(true);
+          return;
+        }
+
+        try {
+          const challenge = new Uint8Array(32);
+          crypto.getRandomValues(challenge);
+
+          const assertion = await navigator.credentials.get({
+            publicKey: {
+              challenge,
+              allowCredentials: [
+                {
+                  type: 'public-key',
+                  id: fromBase64Url(credId)
+                }
+              ],
+              userVerification: 'required',
+              timeout: 60000
+            }
+          });
+
+          if (assertion) {
+            $('lockScreen').classList.add('hidden');
+            $('appMain').classList.remove('hidden');
+            setNowDateTime();
+            renderLedger();
+            showToast('Unlocked via Fingerprint');
+          }
+        } catch (err) {
+          $('fpLockStatus').textContent =
+            'Fingerprint verification cancelled or unavailable. Enter PIN 79819.';
+        }
+      }
+
+      /* -----------------------------------------------------------------------
+         TRANSACTION LOGGING & LEDGER RENDERING
+         ----------------------------------------------------------------------- */
+      function setNowDateTime() {
+        const input = $('txDate');
+        if (!input) return;
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        input.value = now.toISOString().slice(0, 16);
+      }
+
+      function switchMode(mode) {
+        activeMode = mode;
+        const tabSpend = $('tabSpend');
+        const tabDeposit = $('tabDeposit');
+        const catWrap = $('catWrap');
+        const btnSubmit = $('btnSubmitTx');
+        const titleInput = $('txTitle');
+
+        if (mode === 'spend') {
+          tabSpend.className = 'tab-btn active-spend';
+          tabDeposit.className = 'tab-btn';
+          catWrap.classList.remove('hidden');
+          btnSubmit.className = 'btn-log spend';
+          btnSubmit.textContent = 'Record UPI Payment (-)';
+          titleInput.placeholder = 'e.g., Tea & omelet, Canteen, Auto fare';
+          renderChips([5, 10, 20, 50, 100], '-₹');
+        } else {
+          tabDeposit.className = 'tab-btn active-deposit';
+          tabSpend.className = 'tab-btn';
+          catWrap.classList.add('hidden');
+          btnSubmit.className = 'btn-log deposit';
+          btnSubmit.textContent = 'Record Cash Deposit (+)';
+          titleInput.placeholder = "e.g., Cash Deposit (Sister's Account)";
+          renderChips([500, 1000, 2000], '+₹');
+        }
+      }
+
+      function renderChips(values, prefix) {
+        const wrap = $('quickChips');
+        wrap.innerHTML = values
+          .map((v) => `<button type="button" class="chip" data-val="${v}">${prefix}${v}</button>`)
+          .join('');
+        wrap.querySelectorAll('.chip').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            $('txAmount').value = btn.getAttribute('data-val');
+            $('txAmount').focus();
+          });
+        });
+      }
+
+      function addTransaction(e) {
+        e.preventDefault();
+        const amt = parseFloat($('txAmount').value);
+        if (!amt || amt <= 0) {
+          showToast('Enter a valid amount');
+          return;
+        }
+
+        const isDeposit = activeMode === 'deposit';
+        const category = isDeposit ? 'Cash Deposit' : $('txCategory').value;
+        const rawTitle = $('txTitle').value.trim();
+        const title = rawTitle || (isDeposit ? "Cash Deposit (Sister's Account)" : category);
+        const dateVal = $('txDate').value || new Date().toISOString().slice(0, 16);
+
+        transactions.push({
+          id: 'tx_' + Date.now(),
+          type: activeMode,
+          amount: Math.round(amt * 100) / 100,
+          title: title,
+          category: category,
+          date: dateVal
+        });
+
+        persistStorage();
+        $('txAmount').value = '';
+        $('txTitle').value = '';
+        setNowDateTime();
+        renderLedger();
+        showToast(isDeposit ? `Recorded +₹${formatINR(amt)}` : `Recorded -₹${formatINR(amt)}`);
+      }
+
+      function formatDateLabel(iso) {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return escapeHtml(iso);
+        const dateStr = d.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+        const timeStr = d
+          .toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          })
+          .toUpperCase();
+        return `${dateStr}, ${timeStr}`;
+      }
+
+      function renderLedger() {
+        // Ascending sort to compute accurate running balances
+        const asc = transactions.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+        let totalIn = 0;
+        let totalOut = 0;
+        let running = 0;
+
+        asc.forEach((tx) => {
+          const val = Number(tx.amount) || 0;
+          if (tx.type === 'deposit') {
+            totalIn += val;
+            running += val;
+          } else {
+            totalOut += val;
+            running -= val;
+          }
+          tx.runningBal = Math.round(running * 100) / 100;
+        });
+
+        const remaining = Math.round((totalIn - totalOut) * 100) / 100;
+        $('remainingVal').textContent = formatINR(remaining);
+        $('depositedVal').textContent = '₹' + formatINR(totalIn);
+        $('spentVal').textContent = '₹' + formatINR(totalOut);
+
+        // Estimate remaining days based on active spend days
+        const spendList = asc.filter((t) => t.type === 'spend');
+        const uniqueSpendDays = new Set(spendList.map((t) => String(t.date).slice(0, 10))).size;
+        const dailyAvg = uniqueSpendDays > 0 ? totalOut / uniqueSpendDays : 0;
+        if (dailyAvg > 0 && remaining > 0) {
+          const days = Math.floor(remaining / dailyAvg);
+          $('pacePill').textContent = `~${days} day${days === 1 ? '' : 's'} left`;
+        } else {
+          $('pacePill').textContent = remaining > 0 ? 'Active balance' : 'Zero balance';
+        }
+
+        // Filter & search for display (newest first)
+        const query = ($('searchInput').value || '').trim().toLowerCase();
+        const filtered = asc
+          .slice()
+          .reverse()
+          .filter((tx) => {
+            if (activeFilter !== 'all' && tx.type !== activeFilter) return false;
+            if (query) {
+              const hay = `${tx.title} ${tx.category} ${tx.amount}`.toLowerCase();
+              if (!hay.includes(query)) return false;
+            }
+            return true;
+          });
+
+        $('recordCount').textContent = `${filtered.length} record${filtered.length === 1 ? '' : 's'}`;
+
+        const listEl = $('txList');
+        if (filtered.length === 0) {
+          listEl.innerHTML = `<div style="text-align:center;padding:24px;color:#64748b;font-size:13px;">No matching transactions found.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = filtered
+          .map((tx) => {
+            const isDep = tx.type === 'deposit';
+            return `
+              <div class="tx-card">
+                <div class="tx-icon ${isDep ? 'deposit' : 'spend'}" aria-hidden="true">
+                  ${isDep ? '↓' : '↑'}
+                </div>
+                <div class="tx-info">
+                  <div class="tx-title">${escapeHtml(tx.title)}</div>
+                  <div class="tx-sub-row">
+                    <span class="tx-cat ${isDep ? 'deposit' : ''}">${escapeHtml(tx.category)}</span>
+                    <span class="tx-recorded">🔒 Recorded</span>
+                  </div>
+                  <div class="tx-datetime">${formatDateLabel(tx.date)}</div>
+                </div>
+                <div class="tx-right">
+                  <div class="tx-amt tabular ${isDep ? 'deposit' : 'spend'}">
+                    ${isDep ? '+' : '-'}₹${formatINR(tx.amount)}
+                  </div>
+                  <div class="tx-bal tabular">Bal: ₹${formatINR(tx.runningBal)}</div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      /* -----------------------------------------------------------------------
+         JSON BACKUP & RESTORE
+         ----------------------------------------------------------------------- */
+      function exportBackup() {
+        const dataStr = JSON.stringify(
+          {
+            app: 'CircleVault',
+            exportedAt: new Date().toISOString(),
+            transactions
+          },
+          null,
+          2
+        );
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CircleVault_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Backup JSON exported');
+      }
+
+      function handleFileImport(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const obj = JSON.parse(evt.target.result);
+            if (!obj || !Array.isArray(obj.transactions) || obj.transactions.length === 0) {
+              showToast('Invalid backup JSON file');
+              return;
+            }
+            pendingRestoreData = obj.transactions;
+            $('restoreConfirmMsg').textContent = `Restore ${pendingRestoreData.length} records from backup?`;
+            $('restoreConfirm').classList.remove('hidden');
+          } catch (err) {
+            showToast('Could not read JSON file');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      }
+
+      /* -----------------------------------------------------------------------
+         EVENT LISTENERS
+         ----------------------------------------------------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        initStorage();
+        updateFingerprintStatus();
+        switchMode('spend');
+        setNowDateTime();
+
+        document.querySelectorAll('.key-btn[data-num]').forEach((btn) => {
+          btn.addEventListener('click', () => enterDigit(btn.getAttribute('data-num')));
+        });
+
+        $('btnClearPin').addEventListener('click', () => {
+          pinBuffer = '';
+          $('pinError').textContent = '';
+          renderPinDots(false);
+        });
+
+        $('btnBackPin').addEventListener('click', () => {
+          pinBuffer = pinBuffer.slice(0, -1);
+          $('pinError').textContent = '';
+          renderPinDots(false);
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (!$('lockScreen').classList.contains('hidden')) {
+            if (/^[0-9]$/.test(e.key)) enterDigit(e.key);
+            if (e.key === 'Backspace') {
+              pinBuffer = pinBuffer.slice(0, -1);
+              renderPinDots(false);
+            }
+          }
+        });
+
+        $('btnFingerprintLogin').addEventListener('click', unlockWithFingerprint);
+        $('btnRegisterFp').addEventListener('click', () => registerFingerprint(false));
+
+        $('btnLockNow').addEventListener('click', lockApp);
+        $('btnOpenVault').addEventListener('click', () => {
+          updateFingerprintStatus();
+          $('restoreConfirm').classList.add('hidden');
+          $('vaultModal').classList.remove('hidden');
+        });
+        $('btnCloseVault').addEventListener('click', () => $('vaultModal').classList.add('hidden'));
+
+        $('tabSpend').addEventListener('click', () => switchMode('spend'));
+        $('tabDeposit').addEventListener('click', () => switchMode('deposit'));
+        $('txForm').addEventListener('submit', addTransaction);
+
+        document.querySelectorAll('.filter-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.getAttribute('data-filter');
+            renderLedger();
+          });
+        });
+
+        $('searchInput').addEventListener('input', renderLedger);
+        $('btnExportJson').addEventListener('click', exportBackup);
+        $('fileImportJson').addEventListener('change', handleFileImport);
+
+        $('btnCancelRestore').addEventListener('click', () => {
+          pendingRestoreData = null;
+          $('restoreConfirm').classList.add('hidden');
+        });
+
+        $('btnConfirmRestore').addEventListener('click', () => {
+          if (!pendingRestoreData) return;
+          transactions = pendingRestoreData;
+          persistStorage();
+          pendingRestoreData = null;
+          $('restoreConfirm').classList.add('hidden');
+          $('vaultModal').classList.add('hidden');
+          renderLedger();
+          showToast('Ledger restored from backup');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
